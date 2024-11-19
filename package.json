@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.10.0",
-    "firebase": "^7.15.4",
+    "firebase": "^10.9.0",
     "firebase-admin": "^8.12.1",
     "preact": "^10.3.2",
     "preact-render-to-string": "^5.1.4",
