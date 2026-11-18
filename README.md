@@ -10,6 +10,7 @@ Built with plain HTML, CSS and JavaScript, packaged as a native Android app with
 - Search by name or ingredient (accent and case insensitive)
 - Filter by category: Desayuno, Comida, Cena, Postre, Bebida, Botana
 - Weekly meal plan: assign recipes to days and configurable meals (name, optional time)
+- Export the week plan as text and import it back into any week
 - Shopping list for the week from the planned recipes, with check-off
 - Export recipes as JSON (share sheet on Android) and import them back (paste or file)
 - Works offline; recipes are stored on the device (`localStorage`)

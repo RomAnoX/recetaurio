@@ -1,12 +1,12 @@
-import { exportRecipes, importRecipes } from './backup.js';
-import { CATS, load, save, loadPlan, savePlan, loadMeals, saveMeals, loadShop, saveShop, putPhoto, getPhoto, delPhoto } from './store.js';
+import { icon } from './icons.js';
+import { exportRecipes, exportText, importRecipes, importPlan } from './backup.js';
+import { CATS, DAYS, norm, load, save, loadPlan, savePlan, loadMeals, saveMeals, loadShop, saveShop, putPhoto, getPhoto, delPhoto } from './store.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('tabs');
 
 const esc = (s) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const lines = (s) => s.split('\n').map((l) => l.trim()).filter(Boolean);
-const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 // downscale + JPEG keeps photos small (~100KB) and fast to load
 const shrink = (file, max = 1024) => new Promise((ok, no) => {
@@ -45,7 +45,6 @@ export const DINO = `<img src="dino.png" alt="Dino chef">`;
 let cat = '';
 let week = 0; // offset in weeks from the current one
 
-const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const short = (d) => d.toLocaleDateString('es', { day: 'numeric', month: 'short' });
 const monday = (off) => {
@@ -58,6 +57,8 @@ const tabs = (on) => {
   nav.hidden = !on;
   nav.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.go === on));
 };
+nav.querySelector('[data-go=list]').innerHTML = `${icon('book')}Recetas`;
+nav.querySelector('[data-go=plan]').innerHTML = `${icon('calendar')}Semana`;
 nav.onclick = (e) => {
   const b = e.target.closest('button');
   if (b) b.dataset.go === 'plan' ? plan() : list();
@@ -73,6 +74,16 @@ function rows(recipes, q, c = cat) {
     </button></li>`).join('')}</ul>`;
 }
 
+function closeMenu(refocus) {
+  const menu = app.querySelector('.menu'), more = app.querySelector('#more');
+  if (!menu || menu.hidden) return;
+  menu.hidden = true;
+  more.setAttribute('aria-expanded', 'false');
+  if (refocus) more.focus();
+}
+document.addEventListener('click', (e) => { if (!e.target.closest('.more')) closeMenu(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(true); });
+
 export function list() {
   tabs('list');
   const recipes = load();
@@ -83,19 +94,30 @@ export function list() {
        <div class="chips" id="chips"></div>
        <div id="results"></div>`
     : `<div class="empty">${DINO}<h2>Tu recetario está vacío</h2><p>Toca + para guardar tu primera receta.</p></div>`)
-    + `<div class="tools end">${recipes.length ? '<button class="chip" id="export">⬇ Exportar recetas</button>' : ''}<button class="chip" id="import">⬆ Importar recetas</button></div>
-       <button class="fab" aria-label="Nueva receta">+</button>`;
-  app.querySelector('.fab').onclick = () => form();
-  app.querySelector('#import').onclick = importForm;
+    + `<div class="more">
+         <button class="fab alt" id="more" aria-label="Exportar o importar" aria-haspopup="menu" aria-expanded="false">${icon('swap', 26, 2.5)}</button>
+         <div class="menu" role="menu" hidden>
+           ${recipes.length ? `<button role="menuitem" id="export">${icon('export')}Exportar recetas</button>` : ''}
+           <button role="menuitem" id="import">${icon('import')}Importar recetas</button>
+         </div>
+       </div>
+       <button class="fab" aria-label="Nueva receta">${icon('plus', 30, 3)}</button>`;
+  app.querySelector('.fab:not(.alt)').onclick = () => form();
+  const more = app.querySelector('#more');
+  more.onclick = () => {
+    const menu = app.querySelector('.menu');
+    menu.hidden = !menu.hidden;
+    more.setAttribute('aria-expanded', !menu.hidden);
+    if (!menu.hidden) menu.querySelector('button').focus();
+  };
+  app.querySelector('#import').onclick = () => { closeMenu(); importForm(); };
   const results = app.querySelector('#results');
   if (!results) return;
   const q = app.querySelector('#q');
   const chips = app.querySelector('#chips');
-  const exp = app.querySelector('#export');
-  exp.onclick = async () => {
-    exp.disabled = true;
+  app.querySelector('#export').onclick = async () => {
+    closeMenu();
     try { await exportRecipes(); } catch (e) { if (!/cancel/i.test(e?.message)) alert('No se pudo exportar.'); }
-    exp.disabled = false;
   };
   const draw = () => {
     chips.innerHTML = used.length
@@ -188,13 +210,13 @@ export function plan() {
   const m = monday(week), wk = iso(m), meals = loadMeals(), slots = loadPlan()[wk] || {};
   const byId = Object.fromEntries(load().map((r) => [r.id, r]));
   const day = (i) => new Date(m.getFullYear(), m.getMonth(), m.getDate() + i);
-  app.innerHTML = `<div class="weeknav"><button class="btn alt" data-w="-1" aria-label="Semana anterior">‹</button>
+  app.innerHTML = `<div class="weeknav"><button class="btn alt" data-w="-1" aria-label="Semana anterior">${icon('left', 24)}</button>
     <b>${short(day(0))} – ${short(day(6))}</b>
-    <button class="btn alt" data-w="1" aria-label="Semana siguiente">›</button></div>
-    <div class="tools"><button class="chip" id="cfg">⚙ Comidas</button><button class="chip" id="shop">🛒 Lista de compras</button></div>
+    <button class="btn alt" data-w="1" aria-label="Semana siguiente">${icon('right', 24)}</button></div>
+    <div class="tools"><button class="chip" id="cfg">${icon('meals')}Comidas</button><button class="chip" id="shop">${icon('cart')}Lista de compras</button><button class="chip" id="xplan" aria-label="Exportar semana">${icon('export')}Exportar</button><button class="chip" id="iplan" aria-label="Importar semana">${icon('import')}Importar</button></div>
     <div id="days">${DAYS.map((n, i) => `<section class="day"><h3>${n} <small>${short(day(i))}</small></h3>${meals.map((ml) => {
       const r = byId[slots[`${i}-${ml.id}`]];
-      return `<button class="slot" data-s="${i}-${ml.id}"><span>${esc(ml.name)}${ml.time ? `<small>${esc(ml.time)}</small>` : ''}</span>${r ? `<b>${esc(r.title)}</b>` : '<em>+ Agregar</em>'}</button>`;
+      return `<button class="slot" data-s="${i}-${ml.id}"><span>${esc(ml.name)}${ml.time ? `<small>${esc(ml.time)}</small>` : ''}</span>${r ? `<b>${esc(r.title)}</b>` : `<em>${icon('plus', 16)}Agregar</em>`}</button>`;
     }).join('')}</section>`).join('')}</div>`;
   app.querySelector('.weeknav').onclick = (e) => {
     const b = e.target.closest('[data-w]');
@@ -202,6 +224,25 @@ export function plan() {
   };
   app.querySelector('#cfg').onclick = mealsForm;
   app.querySelector('#shop').onclick = shopping;
+  app.querySelector('#iplan').onclick = () => importScreen(
+    'Importar semana',
+    `Pega el texto de un plan exportado. Se coloca en la semana que ves (${short(day(0))} – ${short(day(6))}) y reemplaza solo los espacios que traiga.`,
+    (t) => { const r = importPlan(t, wk); return `Colocadas: ${r.set}. Omitidas: ${r.skipped} (receta o comida no encontrada).`; },
+    'El texto no es un plan válido.',
+    plan,
+  );
+  app.querySelector('#xplan').onclick = async (e) => {
+    const rows = DAYS.map((n, i) => {
+      const l = meals.filter((ml) => byId[slots[`${i}-${ml.id}`]])
+        .map((ml) => `  ${ml.name}${ml.time ? ` (${ml.time})` : ''}: ${byId[slots[`${i}-${ml.id}`]].title}`);
+      return l.length ? [`${n} ${short(day(i))}`, ...l].join('\n') : '';
+    }).filter(Boolean);
+    if (!rows.length) return alert('No hay recetas en el plan de esta semana.');
+    e.target.disabled = true;
+    try { await exportText([`Plan semanal ${short(day(0))} – ${short(day(6))}`, ...rows].join('\n\n'), `plan-${wk}.txt`); }
+    catch (err) { if (!/cancel/i.test(err?.message)) alert('No se pudo exportar.'); }
+    e.target.disabled = false;
+  };
   app.querySelector('#days').onclick = (e) => {
     const b = e.target.closest('.slot');
     if (b) pick(wk, b.dataset.s);
@@ -246,10 +287,10 @@ function mealsForm() {
       ${ms.map((x, i) => `<div class="mealrow" data-i="${i}">
         <input class="mn" value="${esc(x.name)}" placeholder="Nombre" aria-label="Nombre">
         <input class="mt" type="time" value="${esc(x.time)}" aria-label="Hora">
-        <button type="button" class="ic" data-a="up" aria-label="Subir"${i ? '' : ' disabled'}>▲</button>
-        <button type="button" class="ic" data-a="down" aria-label="Bajar"${i < ms.length - 1 ? '' : ' disabled'}>▼</button>
-        <button type="button" class="ic" data-a="del" aria-label="Quitar"${ms.length > 1 ? '' : ' disabled'}>✕</button></div>`).join('')}
-      <button class="chip" id="add">+ Agregar comida</button>
+        <button type="button" class="ic" data-a="up" aria-label="Subir"${i ? '' : ' disabled'}>${icon('up', 22)}</button>
+        <button type="button" class="ic" data-a="down" aria-label="Bajar"${i < ms.length - 1 ? '' : ' disabled'}>${icon('down', 22)}</button>
+        <button type="button" class="ic" data-a="del" aria-label="Quitar"${ms.length > 1 ? '' : ' disabled'}>${icon('x', 22)}</button></div>`).join('')}
+      <button class="chip" id="add">${icon('plus')}Agregar comida</button>
       <div class="row"><button class="btn alt" id="cancel">Cancelar</button><button class="btn" id="save">Guardar</button></div>`;
     app.querySelectorAll('.mealrow').forEach((row) => {
       const i = +row.dataset.i;
@@ -311,20 +352,28 @@ function shopping() {
   };
 }
 
-function importForm() {
+function importScreen(title, hint, run, invalid, back) {
   tabs(null);
-  app.innerHTML = `<h2 class="ptitle">Importar recetas</h2>
-    <p class="hint">Pega el texto exportado o elige el archivo. Las recetas que ya tienes no se duplican.</p>
+  app.innerHTML = `<h2 class="ptitle">${title}</h2>
+    <p class="hint">${hint}</p>
     <label>Texto</label><textarea id="txt"></textarea>
     <label>Archivo</label><input type="file" id="file" accept=".json,.txt,application/json,text/plain">
     <div class="row"><button class="btn alt" id="cancel">Cancelar</button><button class="btn" id="go">Importar</button></div>`;
   const txt = app.querySelector('#txt'), file = app.querySelector('#file');
   file.onchange = async () => { if (file.files[0]) txt.value = await file.files[0].text(); };
-  app.querySelector('#cancel').onclick = list;
+  app.querySelector('#cancel').onclick = back;
   app.querySelector('#go').onclick = () => {
-    let r;
-    try { r = importRecipes(txt.value); } catch { return alert('El texto no es una exportación válida de Recetaurio.'); }
-    alert(`Importadas: ${r.added}. Omitidas: ${r.skipped}.`);
-    list();
+    let msg;
+    try { msg = run(txt.value); } catch { return alert(invalid); }
+    alert(msg);
+    back();
   };
 }
+
+const importForm = () => importScreen(
+  'Importar recetas',
+  'Pega el texto exportado o elige el archivo. Las recetas que ya tienes no se duplican.',
+  (t) => { const r = importRecipes(t); return `Importadas: ${r.added}. Omitidas: ${r.skipped}.`; },
+  'El texto no es una exportación válida de Recetaurio.',
+  list,
+);

@@ -1,5 +1,10 @@
 const KEY = 'recetaurio.recipes';
 
+export const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+// accent- and case-insensitive form for matching text
+export const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
 export const CATS = ['Desayuno', 'Comida', 'Cena', 'Postre', 'Bebida', 'Botana'];
 
 export const load = () => {

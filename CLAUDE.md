@@ -30,9 +30,10 @@ No tests, linter or formatter configured. Verify UI changes in the browser (`npm
 |------|---------|
 | `www/index.html` | Shell: `<header>` (title + `#mascot`) and `<main id="app">` |
 | `www/app.js` | Entry point: calls `list()`, fills `#mascot` |
-| `www/store.js` | `CATS`, localStorage `load`/`save` (recipes), `loadPlan`/`savePlan`, `loadMeals`/`saveMeals`, `loadShop`/`saveShop`; IndexedDB `putPhoto`/`getPhoto`/`delPhoto`, `migratePhotos` |
-| `www/backup.js` | `exportRecipes()`, `importRecipes()` |
-| `www/views.js` | Helpers (`esc`, `lines`, `norm`), `DINO`, screens `list`/`view`/`form`/`importForm`/`plan`/`pick`/`mealsForm`/`shopping`, tab bar |
+| `www/store.js` | `CATS`, `DAYS`, `norm`, localStorage `load`/`save` (recipes), `loadPlan`/`savePlan`, `loadMeals`/`saveMeals`, `loadShop`/`saveShop`; IndexedDB `putPhoto`/`getPhoto`/`delPhoto`, `migratePhotos` |
+| `www/icons.js` | `icon(name, size, stroke)` inline SVG set (24px grid, round caps, `currentColor`) |
+| `www/backup.js` | `send()` (share sheet / download), `exportRecipes()`, `exportText()`, `importRecipes()`, `importPlan()` |
+| `www/views.js` | Helpers (`esc`, `lines`, `norm`), `DINO`, screens `list`/`view`/`form`/`importScreen` (generic paste/file import used by recipes and plan)/`plan`/`pick`/`mealsForm`/`shopping`, tab bar |
 | `www/style.css` | All styling (~107 lines) |
 | `www/dino.png` | Mascot, used in header and empty state |
 | `www/fredoka.woff2` | Self-hosted display font (variable, weight 300-700) |
@@ -65,6 +66,7 @@ Native ES modules (`<script type="module">`), no bundler. Needs http(s): `file:/
 
 ## Conventions
 
+- Icons: never emoji or text glyphs (⬇ ▲ 🛒 render differently per Android version). Add a path to `icons.js` and use `icon('name')`; decorative, so keep a text label or `aria-label` on the button. Stroke ~2.25 to match Fredoka. Active tab icon turns `--yolk`.
 - Keep it minimal: no new dependencies, frameworks or abstractions unless a feature truly needs them.
 - Match existing style: terse arrow functions, template literals, 2-space indent, CSS tokens instead of hard-coded colors.
 - Spanish strings; accents required (`Categoría`, `Título`).
@@ -94,8 +96,15 @@ Native ES modules (`<script type="module">`), no bundler. Needs http(s): `file:/
 - `backup.js` `exportRecipes()`: JSON `{ app, version: 1, exported, recipes }` (recipes without photos, plan and meals not included).
 - Native: `Capacitor.Plugins.Share.share({ text: json })` (`@capacitor/share`; no bundler, so plugins are reached through `window.Capacitor.Plugins`). Browser preview: downloads a `.json`.
 - Text-only share because a share intent can't carry photos/large payloads without a file, and the Filesystem plugin was rejected. Untested on a real device.
+- Week plan export: ⬇ Exportar semana on the week screen builds readable text for the displayed week (only filled slots; days with nothing are omitted; time shown in parentheses) and sends it with `exportText()`. Plain text for sharing (chat, notes); alerts if the week is empty.
+- Week plan import: ⬆ Importar semana on the week screen → `importPlan(text, wk)` parses that same text into the **displayed** week (`wk`). Day header lines (`Lunes 16 nov`, matched by day name, date ignored) set the day; `Meal (HH:MM): Recipe` lines are matched by `norm`'d meal name and recipe title against what is on the device. Unmatched slots are skipped and counted, never created (no auto-creating recipes/meals). Merges: only slots present in the text change. Throws if nothing recognisable. Works with hand-written text too. Photos/recipes are not carried, so import recipes first on a new device.
 - `importRecipes(text)` (same file) merges an export: needs `app === 'recetaurio'` and a `recipes` array, else throws. Recipes whose `id` already exists are skipped (no overwrite); fields are coerced to strings, unknown category becomes `''`, ids that aren't `[\w-]{1,64}` get a fresh UUID (ids go into HTML attributes, don't loosen this). Imported recipes have no photo.
-- UI: `importForm()` (⬆ Importar recetas on the list screen, also in the empty state): paste text or pick a file (loaded into the textarea). Text paste is the main path since Android export is share-as-text.
+- UI: `importForm()` (Importar recetas in the list screen's transfer menu, also in the empty state): paste text or pick a file (loaded into the textarea). Text paste is the main path since Android export is share-as-text.
+
+## List screen floating buttons
+
+- Two fixed round buttons (so they stay reachable with 100+ recipes): yellow `+` bottom-right (new recipe, selected as `.fab:not(.alt)`, do not use bare `.fab`), swamp transfer button bottom-left (`#more`, `.more` wrapper) that opens `.menu` with Exportar recetas (only if recipes exist) and Importar recetas.
+- Menu: `role="menu"`, `aria-expanded`, focus moves to first item on open; closes on outside click, Escape (refocuses `#more`), or choosing an item. The two document-level listeners live in `views.js` next to `closeMenu()`.
 
 ## Weekly plan
 
