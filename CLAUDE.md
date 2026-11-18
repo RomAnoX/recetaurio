@@ -13,6 +13,13 @@ Store many recipes, then build a **weekly meal plan** from them. Recipes are the
 - Android: `minSdk 24`, `targetSdk 36`. `android/` is the stock Capacitor project plus custom icons and splash screens.
 - Storage: `localStorage` key `recetaurio.recipes` (JSON array). No backend, no network.
 
+## Building the APK
+
+- No local JDK/Android SDK needed: `.github/workflows/android-apk.yml` builds a debug APK on every push to `master` (or manually: `gh workflow run "Android APK"`). Download it from the run's **Artifacts** (`recetaurio-debug-apk`) or `gh run download <run-id> -n recetaurio-debug-apk`.
+- The debug APK is signed with the committed key `android/app/recetaurio-debug.p12` (password `recetaurio`, alias `recetaurio`). Deliberately not secret (repo is public, debug builds only): the fixed key lets a new build install over the old one and keep the app's data. Never reuse it for a Play Store release; that needs its own keystore kept out of the repo.
+- Sideload: copy the APK to the phone, allow "Install unknown apps" for the app that opens it, install.
+- Local build (if a JDK 21 + Android SDK 36 exist): `npx cap sync android && cd android && ./gradlew assembleDebug`.
+
 ## Commands
 
 ```sh
