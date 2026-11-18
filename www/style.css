@@ -105,3 +105,36 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
   display: inline-block; padding: 2px 12px; border-radius: 12px;
   background: var(--yolk); color: var(--swamp); font: 500 .95rem var(--display);
 }
+
+#tabs { max-width: 560px; margin: 0 auto; padding: 22px 20px 0; }
+#tabs[hidden] { display: none; }
+#tabs:not([hidden]) + main { padding-top: 12px; }
+
+.weeknav { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.weeknav b { font: 500 1.1rem var(--display); }
+.weeknav .btn { flex: none; width: 48px; font-size: 1.5rem; }
+.day { margin-top: 18px; }
+.day h3 { margin: 0 0 6px; font: 600 1.2rem var(--display); color: var(--swamp); }
+.day h3 small { font: 400 .9rem system-ui; color: var(--muted); }
+.slot {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  min-height: 48px; padding: 8px 12px; margin-bottom: 6px; text-align: left;
+  background: #fff; border: 2px solid #c9d5c0; border-radius: 10px; font: inherit; color: inherit;
+}
+.slot span { flex: none; width: 110px; color: var(--muted); font-size: .9rem; line-height: 1.2; }
+.slot small { display: block; font-size: .8rem; }
+.slot b { font: 500 1.05rem/1.2 var(--display); }
+.slot em { color: var(--muted); font-style: normal; }
+.ptitle { font: 600 1.5rem var(--display); margin: 0 0 12px; }
+
+#cfg { margin-top: 10px; }
+.hint { margin: 0; color: var(--muted); }
+.mealrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+.mealrow .mn { flex: 1 1 100%; }
+.mealrow .mt { flex: 1; width: auto; min-width: 0; }
+.ic {
+  flex: none; width: 44px; height: 44px; border: 0; border-radius: 10px;
+  background: #dde6d5; color: var(--swamp); font-size: 1rem;
+}
+.ic:disabled { opacity: .35; }
+#add { margin-top: 18px; }

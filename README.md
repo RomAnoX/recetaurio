@@ -35,7 +35,3 @@ npx cap open android   # then press Run in Android Studio
 ```
 
 Run `npx cap sync android` again after every change in `www/`.
-
-## Ideas
-
-Photos, favorites, backup/export, sync across devices.
