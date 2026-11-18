@@ -118,8 +118,16 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 .day h3 small { font: 400 .9rem system-ui; color: var(--muted); }
 .slot {
   display: flex; align-items: center; gap: 12px; width: 100%;
-  min-height: 48px; padding: 8px 12px; margin-bottom: 6px; text-align: left;
+  min-height: 48px; padding: 0; margin-bottom: 6px; text-align: left;
   background: #fff; border: 2px solid #c9d5c0; border-radius: 10px; font: inherit; color: inherit;
+}
+.slot-main {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 12px;
+  background: none; border: 0; border-radius: 8px; font: inherit; color: inherit; text-align: left;
+}
+.slot-view {
+  flex: none; display: grid; place-items: center; width: 38px; height: 38px; margin-right: 6px;
+  background: #dde6d5; color: var(--swamp); border: 0; border-radius: 8px;
 }
 .slot span { flex: none; width: 110px; color: var(--muted); font-size: .9rem; line-height: 1.2; }
 .slot small { display: block; font-size: .8rem; }

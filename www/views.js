@@ -138,10 +138,11 @@ export function list() {
   draw();
 }
 
-function view(id) {
+// `back` is where Volver / Borrar / saving an edit return to (the list, or the week plan)
+function view(id, back = list) {
   tabs(null);
   const r = load().find((x) => x.id === id);
-  if (!r) return list();
+  if (!r) return back();
   app.innerHTML = `<div class="view">${r.photo ? `<img class="hero" data-p="${esc(r.id)}" alt="">` : ''}<h2>${esc(r.title)}</h2>${r.category ? `<span class="tag">${esc(r.category)}</span>` : ''}
     <h3>Ingredientes</h3><ul>${lines(r.ingredients).map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
     <h3>Pasos</h3><ol>${lines(r.steps).map((l) => `<li>${esc(l)}</li>`).join('')}</ol>
@@ -149,19 +150,19 @@ function view(id) {
     <button class="btn" id="edit">Editar</button>
     <button class="btn danger" id="del">Borrar</button></div></div>`;
   hydrate();
-  app.querySelector('#back').onclick = list;
-  app.querySelector('#edit').onclick = () => form(r);
+  app.querySelector('#back').onclick = back;
+  app.querySelector('#edit').onclick = () => form(r, () => view(id, back));
   app.querySelector('#del').onclick = () => {
     if (confirm('¿Borrar receta?')) {
       save(load().filter((x) => x.id !== id));
       forget(id);
       delPhoto(id).catch(() => {});
-      list();
+      back();
     }
   };
 }
 
-function form(r = { title: '', category: '', ingredients: '', steps: '' }) {
+function form(r = { title: '', category: '', ingredients: '', steps: '' }, back = list) {
   tabs(null);
   const id = r.id || crypto.randomUUID();
   let blob = null; // newly picked photo
@@ -189,7 +190,7 @@ function form(r = { title: '', category: '', ingredients: '', steps: '' }) {
     showPhoto();
   };
   rm.onclick = () => { blob = null; keep = false; file.value = ''; showPhoto(); };
-  app.querySelector('#cancel').onclick = list;
+  app.querySelector('#cancel').onclick = back;
   app.querySelector('form').onsubmit = async (e) => {
     e.preventDefault();
     const d = { ...Object.fromEntries(new FormData(e.target)), photo: !!blob || keep };
@@ -201,7 +202,7 @@ function form(r = { title: '', category: '', ingredients: '', steps: '' }) {
       else all.push({ id, ...d });
       save(all);
     } catch { return alert('No se pudo guardar la receta.'); }
-    list();
+    back();
   };
 }
 
@@ -216,7 +217,7 @@ export function plan() {
     <div class="tools"><button class="chip" id="cfg">${icon('meals')}Comidas</button><button class="chip" id="shop">${icon('cart')}Lista de compras</button><button class="chip" id="xplan" aria-label="Exportar semana">${icon('export')}Exportar</button><button class="chip" id="iplan" aria-label="Importar semana">${icon('import')}Importar</button></div>
     <div id="days">${DAYS.map((n, i) => `<section class="day"><h3>${n} <small>${short(day(i))}</small></h3>${meals.map((ml) => {
       const r = byId[slots[`${i}-${ml.id}`]];
-      return `<button class="slot" data-s="${i}-${ml.id}"><span>${esc(ml.name)}${ml.time ? `<small>${esc(ml.time)}</small>` : ''}</span>${r ? `<b>${esc(r.title)}</b>` : `<em>${icon('plus', 16)}Agregar</em>`}</button>`;
+      return `<div class="slot"><button class="slot-main" data-s="${i}-${ml.id}"><span>${esc(ml.name)}${ml.time ? `<small>${esc(ml.time)}</small>` : ''}</span>${r ? `<b>${esc(r.title)}</b>` : `<em>${icon('plus', 16)}Agregar</em>`}</button>${r ? `<button class="slot-view" data-v="${esc(r.id)}" aria-label="Ver receta ${esc(r.title)}">${icon('eye')}</button>` : ''}</div>`;
     }).join('')}</section>`).join('')}</div>`;
   app.querySelector('.weeknav').onclick = (e) => {
     const b = e.target.closest('[data-w]');
@@ -244,7 +245,9 @@ export function plan() {
     e.target.disabled = false;
   };
   app.querySelector('#days').onclick = (e) => {
-    const b = e.target.closest('.slot');
+    const v = e.target.closest('.slot-view');
+    if (v) return view(v.dataset.v, plan);
+    const b = e.target.closest('.slot-main');
     if (b) pick(wk, b.dataset.s);
   };
 }

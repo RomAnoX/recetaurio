@@ -110,7 +110,8 @@ Native ES modules (`<script type="module">`), no bundler. Needs http(s): `file:/
 - Storage key `recetaurio.plan`: `{ "<monday yyyy-mm-dd>": { "<day 0-6>-<meal id>": recipeId } }`. Week starts Monday; `week` (module var in `views.js`) is the offset from the current week.
 - Slots: Lunes-Domingo × configurable meals. One recipe per slot.
 - Meals: key `recetaurio.meals`, `[{ id, name, time: 'HH:MM' | '' }]` in display order. Defaults Desayuno/Comida/Cena with `id === name`, so plan keys saved before meals were configurable still match. New meals get `crypto.randomUUID()` ids (contain `-`; parse slot key as `s[0]` day + `s.slice(2)` id). Edited via `mealsForm()` (⚙ button on the week screen): rename, optional time, reorder ▲▼, delete (min 1), add. Deleting a meal hides its plan entries (left in storage, not restored by re-adding the same name).
-- `plan()` shows the week with prev/next; tapping a slot opens `pick()` (search, tap recipe to assign, Quitar to clear). Deleted recipes render as empty slots; stale ids stay in storage, harmless.
+- `plan()` shows the week with prev/next. A slot is a `.slot` div with `.slot-main` (tap = `pick()`: search, tap recipe to assign, Quitar to clear) and, when filled, an eye `.slot-view` button that opens the recipe via `view(id, plan)`.
+- `view(id, back)` and `form(r, back)` take a `back` callback (default `list`) used by Volver, Cancelar, Borrar and after saving. From the plan, editing returns to the recipe view and Volver returns to the week. Deleted recipes render as empty slots; stale ids stay in storage, harmless.
 - Tab bar `#tabs` (Recetas / Semana) shows only on `list` and `plan`; `view`, `form`, `pick` hide it via `tabs(null)`. Every screen function must call `tabs(...)` first.
 
 ## Shopping list
