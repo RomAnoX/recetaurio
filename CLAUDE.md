@@ -74,7 +74,6 @@ Native ES modules (`<script type="module">`), no bundler. Needs http(s): `file:/
 
 ## Known gaps and quirks
 
-- `@fontsource-variable/fredoka` is in `package.json` but unused; the font is the local `www/fredoka.woff2`. Safe to remove.
 - No Android back-button handling: back exits the app instead of returning from `view`/`form` to the list (would need `@capacitor/app` `backButton` listener).
 - `load()` does not validate shape; a valid-JSON-but-wrong-shape value (e.g. object, or recipe missing `title`) would break `rows()` (`r.title[0]`).
 - `form` submit on edit does `Object.assign(all.find(...), d)`; throws if the recipe vanished meanwhile (not reachable today, single screen at a time).
