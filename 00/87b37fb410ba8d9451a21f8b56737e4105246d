@@ -1,0 +1,50 @@
+README.md
+  s_db63c0ad28462c::t_9e7233647155ff 9,14
+  s_db63c0ad28462c::t_ae2fca842e10fb 12-13
+www/app.js
+  s_db63c0ad28462c::t_4e2b413ee35c37 2,4
+CLAUDE.md
+  s_db63c0ad28462c::t_ae2fca842e10fb 35,107-112,115
+  s_db63c0ad28462c::t_9e7233647155ff 33-34,80,86-90,92-98,117
+  s_db63c0ad28462c::t_e180e2fc4373f1 46,84-85,91
+package.json
+  s_db63c0ad28462c::t_4694d7ee1b1165 13
+android/capacitor.settings.gradle
+  s_db63c0ad28462c::t_4694d7ee1b1165 4-6
+www/backup.js
+  s_db63c0ad28462c::t_1f5e9d5819e7d8 1-15
+www/style.css
+  s_db63c0ad28462c::t_1f5e9d5819e7d8 153-154
+  s_db63c0ad28462c::t_4e2b413ee35c37 150
+  s_db63c0ad28462c::t_d2382f1e22dcda 149,151-152
+  s_db63c0ad28462c::t_935b4ba5e71f0a 130,141-148
+android/app/capacitor.build.gradle
+  s_db63c0ad28462c::t_4694d7ee1b1165 12
+www/store.js
+  s_db63c0ad28462c::t_4e2b413ee35c37 39-73
+  s_db63c0ad28462c::t_935b4ba5e71f0a 31-38
+www/views.js
+  s_db63c0ad28462c::t_1f5e9d5819e7d8 1,84-85,93-98
+  s_db63c0ad28462c::t_4e2b413ee35c37 2,11-12,21,27-42,71,104,122,128,132-137,143-145,157-160,165,168,170,172-180
+  s_db63c0ad28462c::t_d2382f1e22dcda 13-20,22-26,151-153,156,161-164,166-167
+  s_db63c0ad28462c::t_935b4ba5e71f0a 193,203,283-310
+  s_db63c0ad28462c::t_b678fa11b2d0e1 311
+package-lock.json
+  s_db63c0ad28462c::t_ef9f0a6d5326b5 14,69-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0087b37fb410ba8d9451a21f8b56737e4105246d",
+  "prompts": {},
+  "sessions": {
+    "s_db63c0ad28462c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b8d4f44f-473b-4131-bba3-7afbe29bea9d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Ulises Acosta <ulises.xsoft@gmail.com>"
+    }
+  }
+}
