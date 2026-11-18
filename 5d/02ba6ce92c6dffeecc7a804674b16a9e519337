@@ -1,0 +1,98 @@
+android/app/src/main/res/values/ic_launcher_background.xml
+  s_585254a02d364d::t_37d3c5a12f07ac 1-4
+package.json
+  s_585254a02d364d::t_d8b82b18cda120 3-4,6-7,10-11
+  s_585254a02d364d::t_d3fc18189c3d8d 12-13
+www/app.js
+  s_585254a02d364d::t_d81ef23d1a89c2 37,99
+  s_585254a02d364d::t_37d3c5a12f07ac 12
+  s_585254a02d364d::t_44f1790c7d9cc0 14-15,19-20,23-24,26-28,34,40-41,55-58
+  s_585254a02d364d::t_9364091b513943 16-18,21-22,25,31-32,35-36,42-54,59,65,78,81
+  s_585254a02d364d::t_9d0362127724ae 1-11,13,29-30,33,38-39,60-64,66-77,79-80,82-98
+capacitor.config.json
+  s_585254a02d364d::t_d8b82b18cda120 1-5
+android/app/build.gradle
+  s_585254a02d364d::t_ef4d23d7bf1b56 1-54
+www/style.css
+  s_585254a02d364d::t_f592e6054d5756 7,16-19,22,32,39,44,47,51,60-61,67,69,77
+  s_585254a02d364d::t_269756eb6b747e 35
+  s_585254a02d364d::t_44f1790c7d9cc0 93-95
+  s_585254a02d364d::t_9364091b513943 71,96-107
+  s_585254a02d364d::t_37d3c5a12f07ac 36,41
+  s_585254a02d364d::t_6f8593f27e9fc5 1-6,8-15,20-21,23-31,33,37-38,40,42-43,45-46,48-50,52-59,62-66,68,70,72-76,78-90,92
+  s_585254a02d364d::t_450ea386b15fae 34
+  s_585254a02d364d::t_f762cf1c548e5f 91
+.gitignore
+  s_585254a02d364d::t_d8b82b18cda120 2-3
+android/app/src/main/res/values/strings.xml
+  s_585254a02d364d::t_ef4d23d7bf1b56 1-7
+www/index.html
+  s_585254a02d364d::t_b9591ce1a050d1 1-5,7-10,12-15
+  s_585254a02d364d::t_d81ef23d1a89c2 6,11
+android/app/capacitor.build.gradle
+  s_585254a02d364d::t_ef4d23d7bf1b56 1-19
+android/capacitor.settings.gradle
+  s_585254a02d364d::t_ef4d23d7bf1b56 1-3
+README.md
+  s_585254a02d364d::t_b0507447e9778a 3,5-12,14,16-18,20,22-24,27-41
+android/app/src/main/java/com/recetaurio/app/MainActivity.java
+  s_585254a02d364d::t_ef4d23d7bf1b56 1-5
+android/.gitignore
+  s_585254a02d364d::t_df3b29e657e118 1-101
+android/app/.gitignore
+  s_585254a02d364d::t_244a94751058ef 1-2
+android/app/proguard-rules.pro
+  s_585254a02d364d::t_835b8f91a31717 1-21
+android/app/src/androidTest/java/com/getcapacitor/myapp/ExampleInstrumentedTest.java
+  s_585254a02d364d::t_7c1d4688b62995 1-24
+android/app/src/main/AndroidManifest.xml
+  s_585254a02d364d::t_690fb16a75cd81 1-41
+android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml
+  s_585254a02d364d::t_20b887af9f17d2 1-6,8-27,29-34
+android/app/src/main/res/drawable/ic_launcher_background.xml
+  s_585254a02d364d::t_6147ad01d95f71 1-170
+android/app/src/main/res/layout/activity_main.xml
+  s_585254a02d364d::t_95b6fe7b6c49a5 1-12
+android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+  s_585254a02d364d::t_9642d8df68e0d8 1-5
+android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+  s_585254a02d364d::t_ea39662639de77 1-5
+android/app/src/main/res/values/styles.xml
+  s_585254a02d364d::t_057b11159182aa 1-22
+android/app/src/main/res/xml/file_paths.xml
+  s_585254a02d364d::t_7c7ff5f3c82742 1-5
+android/app/src/test/java/com/getcapacitor/myapp/ExampleUnitTest.java
+  s_585254a02d364d::t_39f3f8326f3453 1,3,5,7-12,14-18
+android/build.gradle
+  s_585254a02d364d::t_e01640b82bde9e 1,3-11,13-15,18,20-24,27-28
+android/gradle.properties
+  s_585254a02d364d::t_6ca6bd1d82ed84 1-22
+android/gradle/wrapper/gradle-wrapper.properties
+  s_585254a02d364d::t_bb8c0557128c73 1-7
+android/gradlew
+  s_585254a02d364d::t_99be2777e592f1 1-251
+android/gradlew.bat
+  s_585254a02d364d::t_06a4111b317e81 1-94
+android/settings.gradle
+  s_585254a02d364d::t_f29d25a63b9b53 1-5
+android/variables.gradle
+  s_585254a02d364d::t_d0d29f08036215 1-16
+package-lock.json
+  s_585254a02d364d::t_96aadff3631ab1 3-4,6-74,77-88,91-101,104-116,119-131,134-144,147-161,164-174,177-213,216-225,228-232,234-240,243-249,252-256,258-264,267-273,276-288,291-297,300-306,309-315,318-353,356-365,368-377,380-386,389-395,398-407,410-414,416-422,425-436,439-453,456-462,465-474,477-481,483-489,492-498,501-512,515-529,532-536,538-542,544-550,553-565,568-574,577-586,589-593,595-604,607-613,616-622,625-629,631-638,641-647,650-659,662-666,668-690,693-707,710-714,716-722,725-738,741-745,747-758,761-771,774-780,783-794,797-813,816-834,836-840,842-851,854-863,866-872,875-879,881-889,892-901,904-908,910-924,927-933,936-942,945-951,954-965,968-977,980-993,996-1002,1005-1032,1035-1041,1044-1048,1050-1054,1056-1062,1065-1079,1082-1091,1094-1104,1107-1113,1116-1122,1125-1131,1134-1138,1140-1141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5d02ba6ce92c6dffeecc7a804674b16a9e519337",
+  "prompts": {},
+  "sessions": {
+    "s_585254a02d364d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "47a09d76-9eed-4d8e-bf3f-91c95bc29a86",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Ulises Acosta <ulises.xsoft@gmail.com>"
+    }
+  }
+}
