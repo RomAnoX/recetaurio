@@ -6,9 +6,12 @@ Built with plain HTML, CSS and JavaScript, packaged as a native Android app with
 
 ## Features
 
-- Create, edit and delete recipes (title, category, ingredients, steps)
+- Create, edit and delete recipes (title, category, ingredients, steps, optional photo stored in IndexedDB)
 - Search by name or ingredient (accent and case insensitive)
 - Filter by category: Desayuno, Comida, Cena, Postre, Bebida, Botana
+- Weekly meal plan: assign recipes to days and configurable meals (name, optional time)
+- Shopping list for the week from the planned recipes, with check-off
+- Export recipes as JSON (share sheet on Android)
 - Works offline; recipes are stored on the device (`localStorage`)
 
 ## Project layout

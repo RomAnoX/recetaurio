@@ -127,7 +127,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 .slot em { color: var(--muted); font-style: normal; }
 .ptitle { font: 600 1.5rem var(--display); margin: 0 0 12px; }
 
-#cfg { margin-top: 10px; }
+
 .hint { margin: 0; color: var(--muted); }
 .mealrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
 .mealrow .mn { flex: 1 1 100%; }
@@ -138,3 +138,17 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline-colo
 }
 .ic:disabled { opacity: .35; }
 #add { margin-top: 18px; }
+
+.tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.shop { list-style: none; margin: 12px 0 0; padding: 0; }
+.shop li + li { border-top: 1px solid #d6dfcf; }
+.shop label { display: flex; align-items: center; gap: 12px; margin: 0; min-height: 48px; font: inherit; }
+.shop input { flex: none; width: 24px; height: 24px; padding: 0; accent-color: var(--fern); }
+.shop input:checked + span { text-decoration: line-through; color: var(--muted); }
+.shop small { color: var(--muted); }
+
+.thumb { flex: none; width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: var(--fern); }
+.hero { display: block; width: 100%; max-height: 260px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
+#rmph { margin-top: 8px; }
+
+#export { margin-top: 20px; }

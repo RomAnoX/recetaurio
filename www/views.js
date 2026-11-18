@@ -1,4 +1,5 @@
-import { CATS, load, save, loadPlan, savePlan, loadMeals, saveMeals } from './store.js';
+import { exportRecipes } from './backup.js';
+import { CATS, load, save, loadPlan, savePlan, loadMeals, saveMeals, loadShop, saveShop, putPhoto, getPhoto, delPhoto } from './store.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('tabs');
@@ -6,6 +7,38 @@ const nav = document.getElementById('tabs');
 const esc = (s) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const lines = (s) => s.split('\n').map((l) => l.trim()).filter(Boolean);
 const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+// downscale + JPEG keeps photos small (~100KB) and fast to load
+const shrink = (file, max = 1024) => new Promise((ok, no) => {
+  const img = new Image();
+  img.onload = () => {
+    const k = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * k);
+    c.height = Math.round(img.height * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(img.src);
+    c.toBlob(ok, 'image/jpeg', 0.8);
+  };
+  img.onerror = no;
+  img.src = URL.createObjectURL(file);
+});
+
+// object URLs for stored photos, cached so re-rendering the list doesn't reload them
+const urls = new Map();
+const photoURL = async (id) => {
+  if (!urls.has(id)) {
+    const b = await getPhoto(id);
+    if (!b) return '';
+    urls.set(id, URL.createObjectURL(b));
+  }
+  return urls.get(id);
+};
+const forget = (id) => { URL.revokeObjectURL(urls.get(id)); urls.delete(id); };
+const hydrate = () => app.querySelectorAll('img[data-p]').forEach(async (img) => {
+  const u = await photoURL(img.dataset.p);
+  if (u) img.src = u;
+});
 
 export const DINO = `<img src="dino.png" alt="Dino chef">`;
 
@@ -35,7 +68,7 @@ function rows(recipes, q, c = cat) {
   const hits = recipes.filter((r) => (!c || r.category === c) && norm(`${r.title}\n${r.ingredients}`).includes(n));
   if (!hits.length) return `<p class="none">Sin resultados.</p>`;
   return `<ul class="recipes">${hits.map((r) => `<li><button class="card" data-id="${r.id}">
-    <span class="dot" aria-hidden="true">${esc(r.title[0].toUpperCase())}</span>
+    ${r.photo ? `<img class="thumb" data-p="${esc(r.id)}" alt="">` : `<span class="dot" aria-hidden="true">${esc(r.title[0].toUpperCase())}</span>`}
     <span><b>${esc(r.title)}</b><small>${r.category ? esc(r.category) + ' · ' : ''}${lines(r.ingredients).length} ingredientes</small></span>
     </button></li>`).join('')}</ul>`;
 }
@@ -48,7 +81,8 @@ export function list() {
   app.innerHTML = (recipes.length
     ? `<input type="search" id="q" placeholder="Buscar por nombre o ingrediente" aria-label="Buscar recetas">
        <div class="chips" id="chips"></div>
-       <div id="results"></div>`
+       <div id="results"></div>
+       <button class="chip" id="export">⬇ Exportar recetas</button>`
     : `<div class="empty">${DINO}<h2>Tu recetario está vacío</h2><p>Toca + para guardar tu primera receta.</p></div>`)
     + `<button class="fab" aria-label="Nueva receta">+</button>`;
   app.querySelector('.fab').onclick = () => form();
@@ -56,11 +90,18 @@ export function list() {
   if (!results) return;
   const q = app.querySelector('#q');
   const chips = app.querySelector('#chips');
+  const exp = app.querySelector('#export');
+  exp.onclick = async () => {
+    exp.disabled = true;
+    try { await exportRecipes(); } catch (e) { if (!/cancel/i.test(e?.message)) alert('No se pudo exportar.'); }
+    exp.disabled = false;
+  };
   const draw = () => {
     chips.innerHTML = used.length
       ? ['', ...used].map((c) => `<button class="chip" data-c="${c}" aria-pressed="${c === cat}">${c || 'Todas'}</button>`).join('')
       : '';
     results.innerHTML = rows(recipes, q.value);
+    hydrate();
   };
   q.oninput = draw;
   chips.onclick = (e) => {
@@ -78,36 +119,65 @@ function view(id) {
   tabs(null);
   const r = load().find((x) => x.id === id);
   if (!r) return list();
-  app.innerHTML = `<div class="view"><h2>${esc(r.title)}</h2>${r.category ? `<span class="tag">${esc(r.category)}</span>` : ''}
+  app.innerHTML = `<div class="view">${r.photo ? `<img class="hero" data-p="${esc(r.id)}" alt="">` : ''}<h2>${esc(r.title)}</h2>${r.category ? `<span class="tag">${esc(r.category)}</span>` : ''}
     <h3>Ingredientes</h3><ul>${lines(r.ingredients).map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
     <h3>Pasos</h3><ol>${lines(r.steps).map((l) => `<li>${esc(l)}</li>`).join('')}</ol>
     <div class="row"><button class="btn alt" id="back">Volver</button>
     <button class="btn" id="edit">Editar</button>
     <button class="btn danger" id="del">Borrar</button></div></div>`;
+  hydrate();
   app.querySelector('#back').onclick = list;
   app.querySelector('#edit').onclick = () => form(r);
   app.querySelector('#del').onclick = () => {
-    if (confirm('¿Borrar receta?')) { save(load().filter((x) => x.id !== id)); list(); }
+    if (confirm('¿Borrar receta?')) {
+      save(load().filter((x) => x.id !== id));
+      forget(id);
+      delPhoto(id).catch(() => {});
+      list();
+    }
   };
 }
 
 function form(r = { title: '', category: '', ingredients: '', steps: '' }) {
   tabs(null);
+  const id = r.id || crypto.randomUUID();
+  let blob = null; // newly picked photo
+  let keep = !!r.photo; // keep the stored one
   app.innerHTML = `<form>
     <label>Título</label><input name="title" required value="${esc(r.title)}">
     <label>Categoría</label><select name="category"><option value="">Sin categoría</option>${CATS.map((c) => `<option${c === r.category ? ' selected' : ''}>${c}</option>`).join('')}</select>
     <label>Ingredientes (uno por línea)</label><textarea name="ingredients">${esc(r.ingredients)}</textarea>
     <label>Pasos (uno por línea)</label><textarea name="steps">${esc(r.steps)}</textarea>
+    <label>Foto</label><img id="pv" class="hero" alt="" hidden>
+    <input type="file" id="file" accept="image/*">
+    <button type="button" class="chip" id="rmph" hidden>Quitar foto</button>
     <div class="row"><button type="button" class="btn alt" id="cancel">Cancelar</button>
     <button class="btn">Guardar</button></div></form>`;
+  const pv = app.querySelector('#pv'), rm = app.querySelector('#rmph'), file = app.querySelector('#file');
+  const showPhoto = async () => {
+    pv.hidden = rm.hidden = !(blob || keep);
+    if (blob) pv.src = URL.createObjectURL(blob);
+    else if (keep) pv.src = await photoURL(id);
+  };
+  showPhoto();
+  file.onchange = async () => {
+    if (!file.files[0]) return;
+    try { blob = await shrink(file.files[0]); } catch { alert('No se pudo leer la imagen.'); }
+    showPhoto();
+  };
+  rm.onclick = () => { blob = null; keep = false; file.value = ''; showPhoto(); };
   app.querySelector('#cancel').onclick = list;
-  app.querySelector('form').onsubmit = (e) => {
+  app.querySelector('form').onsubmit = async (e) => {
     e.preventDefault();
-    const d = Object.fromEntries(new FormData(e.target));
-    const all = load();
-    if (r.id) Object.assign(all.find((x) => x.id === r.id), d);
-    else all.push({ id: crypto.randomUUID(), ...d });
-    save(all);
+    const d = { ...Object.fromEntries(new FormData(e.target)), photo: !!blob || keep };
+    try {
+      if (blob) { await putPhoto(id, blob); forget(id); }
+      else if (!keep && r.photo) { await delPhoto(id); forget(id); }
+      const all = load();
+      if (r.id) Object.assign(all.find((x) => x.id === r.id), d);
+      else all.push({ id, ...d });
+      save(all);
+    } catch { return alert('No se pudo guardar la receta.'); }
     list();
   };
 }
@@ -120,7 +190,7 @@ export function plan() {
   app.innerHTML = `<div class="weeknav"><button class="btn alt" data-w="-1" aria-label="Semana anterior">‹</button>
     <b>${short(day(0))} – ${short(day(6))}</b>
     <button class="btn alt" data-w="1" aria-label="Semana siguiente">›</button></div>
-    <button class="chip" id="cfg">⚙ Configurar comidas</button>
+    <div class="tools"><button class="chip" id="cfg">⚙ Comidas</button><button class="chip" id="shop">🛒 Lista de compras</button></div>
     <div id="days">${DAYS.map((n, i) => `<section class="day"><h3>${n} <small>${short(day(i))}</small></h3>${meals.map((ml) => {
       const r = byId[slots[`${i}-${ml.id}`]];
       return `<button class="slot" data-s="${i}-${ml.id}"><span>${esc(ml.name)}${ml.time ? `<small>${esc(ml.time)}</small>` : ''}</span>${r ? `<b>${esc(r.title)}</b>` : '<em>+ Agregar</em>'}</button>`;
@@ -130,6 +200,7 @@ export function plan() {
     if (b) { week += +b.dataset.w; plan(); }
   };
   app.querySelector('#cfg').onclick = mealsForm;
+  app.querySelector('#shop').onclick = shopping;
   app.querySelector('#days').onclick = (e) => {
     const b = e.target.closest('.slot');
     if (b) pick(wk, b.dataset.s);
@@ -208,4 +279,33 @@ function mealsForm() {
     };
   };
   draw();
+}
+
+function shopping() {
+  tabs(null);
+  const m = monday(week), wk = iso(m);
+  const byId = Object.fromEntries(load().map((r) => [r.id, r]));
+  const mealIds = new Set(loadMeals().map((x) => x.id));
+  const items = new Map(); // normalized line -> { text, n }; same line in several recipes = ×n, quantities are not summed
+  for (const [slot, id] of Object.entries(loadPlan()[wk] || {})) {
+    if (!mealIds.has(slot.slice(2)) || !byId[id]) continue;
+    for (const l of lines(byId[id].ingredients)) {
+      const k = norm(l), it = items.get(k);
+      if (it) it.n++; else items.set(k, { text: l, n: 1 });
+    }
+  }
+  const done = new Set(loadShop()[wk]);
+  app.innerHTML = `<h2 class="ptitle">Lista de compras</h2>
+    <p class="hint">Semana del ${short(m)}</p>
+    ${items.size ? `<ul class="shop">${[...items].map(([k, it]) => `<li><label><input type="checkbox" data-k="${esc(k)}"${done.has(k) ? ' checked' : ''}>
+      <span>${esc(it.text)}${it.n > 1 ? ` <small>×${it.n}</small>` : ''}</span></label></li>`).join('')}</ul>`
+      : '<p class="none">No hay recetas en el plan de esta semana.</p>'}
+    <div class="row"><button class="btn alt" id="back">Volver</button></div>`;
+  app.querySelector('#back').onclick = plan;
+  const ul = app.querySelector('.shop');
+  if (ul) ul.onchange = () => {
+    const s = loadShop();
+    s[wk] = [...ul.querySelectorAll('input:checked')].map((i) => i.dataset.k);
+    saveShop(s);
+  };
 }
