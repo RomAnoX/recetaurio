@@ -1,0 +1,19 @@
+CLAUDE.md
+  s_db63c0ad28462c::t_dd2c4470b2e9b7 132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e93824e99794fcc657cc45c794742e17ec2601ed",
+  "prompts": {},
+  "sessions": {
+    "s_db63c0ad28462c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b8d4f44f-473b-4131-bba3-7afbe29bea9d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Ulises Acosta <ulises.xsoft@gmail.com>"
+    }
+  }
+}
