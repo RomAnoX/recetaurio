@@ -129,6 +129,7 @@ Native ES modules (`<script type="module">`), no bundler. Needs http(s): `file:/
 
 ## Backlog
 
+- Configurable categories (add, edit, remove), like the configurable meals. Today `CATS` is a hardcoded list in `store.js`; recipes store the category name, so renaming or removing needs a decision on existing recipes, the filter chips, `importRecipes` (unknown category becomes none) and the export
 - Structured ingredients (qty + unit + name) so the shopping list can sum quantities
 - Favorites
 - Include photos, meals and plan in export/import
