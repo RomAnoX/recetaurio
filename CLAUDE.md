@@ -31,8 +31,8 @@ No tests, linter or formatter configured. Verify UI changes in the browser (`npm
 | `www/index.html` | Shell: `<header>` (title + `#mascot`) and `<main id="app">` |
 | `www/app.js` | Entry point: calls `list()`, fills `#mascot` |
 | `www/store.js` | `CATS`, localStorage `load`/`save` (recipes), `loadPlan`/`savePlan`, `loadMeals`/`saveMeals`, `loadShop`/`saveShop`; IndexedDB `putPhoto`/`getPhoto`/`delPhoto`, `migratePhotos` |
-| `www/backup.js` | `exportRecipes()` |
-| `www/views.js` | Helpers (`esc`, `lines`, `norm`), `DINO`, screens `list`/`view`/`form`/`plan`/`pick`/`mealsForm`/`shopping`, tab bar |
+| `www/backup.js` | `exportRecipes()`, `importRecipes()` |
+| `www/views.js` | Helpers (`esc`, `lines`, `norm`), `DINO`, screens `list`/`view`/`form`/`importForm`/`plan`/`pick`/`mealsForm`/`shopping`, tab bar |
 | `www/style.css` | All styling (~107 lines) |
 | `www/dino.png` | Mascot, used in header and empty state |
 | `www/fredoka.woff2` | Self-hosted display font (variable, weight 300-700) |
@@ -94,7 +94,8 @@ Native ES modules (`<script type="module">`), no bundler. Needs http(s): `file:/
 - `backup.js` `exportRecipes()`: JSON `{ app, version: 1, exported, recipes }` (recipes without photos, plan and meals not included).
 - Native: `Capacitor.Plugins.Share.share({ text: json })` (`@capacitor/share`; no bundler, so plugins are reached through `window.Capacitor.Plugins`). Browser preview: downloads a `.json`.
 - Text-only share because a share intent can't carry photos/large payloads without a file, and the Filesystem plugin was rejected. Untested on a real device.
-- No import yet.
+- `importRecipes(text)` (same file) merges an export: needs `app === 'recetaurio'` and a `recipes` array, else throws. Recipes whose `id` already exists are skipped (no overwrite); fields are coerced to strings, unknown category becomes `''`, ids that aren't `[\w-]{1,64}` get a fresh UUID (ids go into HTML attributes, don't loosen this). Imported recipes have no photo.
+- UI: `importForm()` (⬆ Importar recetas on the list screen, also in the empty state): paste text or pick a file (loaded into the textarea). Text paste is the main path since Android export is share-as-text.
 
 ## Weekly plan
 
@@ -114,7 +115,7 @@ Native ES modules (`<script type="module">`), no bundler. Needs http(s): `file:/
 
 - Structured ingredients (qty + unit + name) so the shopping list can sum quantities
 - Favorites
-- Import recipes from the export file; include photos, meals and plan in backups
+- Include photos, meals and plan in export/import
 - Sync across devices
 
 ## History

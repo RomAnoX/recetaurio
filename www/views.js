@@ -1,4 +1,4 @@
-import { exportRecipes } from './backup.js';
+import { exportRecipes, importRecipes } from './backup.js';
 import { CATS, load, save, loadPlan, savePlan, loadMeals, saveMeals, loadShop, saveShop, putPhoto, getPhoto, delPhoto } from './store.js';
 
 const app = document.getElementById('app');
@@ -81,11 +81,12 @@ export function list() {
   app.innerHTML = (recipes.length
     ? `<input type="search" id="q" placeholder="Buscar por nombre o ingrediente" aria-label="Buscar recetas">
        <div class="chips" id="chips"></div>
-       <div id="results"></div>
-       <button class="chip" id="export">⬇ Exportar recetas</button>`
+       <div id="results"></div>`
     : `<div class="empty">${DINO}<h2>Tu recetario está vacío</h2><p>Toca + para guardar tu primera receta.</p></div>`)
-    + `<button class="fab" aria-label="Nueva receta">+</button>`;
+    + `<div class="tools end">${recipes.length ? '<button class="chip" id="export">⬇ Exportar recetas</button>' : ''}<button class="chip" id="import">⬆ Importar recetas</button></div>
+       <button class="fab" aria-label="Nueva receta">+</button>`;
   app.querySelector('.fab').onclick = () => form();
+  app.querySelector('#import').onclick = importForm;
   const results = app.querySelector('#results');
   if (!results) return;
   const q = app.querySelector('#q');
@@ -307,5 +308,23 @@ function shopping() {
     const s = loadShop();
     s[wk] = [...ul.querySelectorAll('input:checked')].map((i) => i.dataset.k);
     saveShop(s);
+  };
+}
+
+function importForm() {
+  tabs(null);
+  app.innerHTML = `<h2 class="ptitle">Importar recetas</h2>
+    <p class="hint">Pega el texto exportado o elige el archivo. Las recetas que ya tienes no se duplican.</p>
+    <label>Texto</label><textarea id="txt"></textarea>
+    <label>Archivo</label><input type="file" id="file" accept=".json,.txt,application/json,text/plain">
+    <div class="row"><button class="btn alt" id="cancel">Cancelar</button><button class="btn" id="go">Importar</button></div>`;
+  const txt = app.querySelector('#txt'), file = app.querySelector('#file');
+  file.onchange = async () => { if (file.files[0]) txt.value = await file.files[0].text(); };
+  app.querySelector('#cancel').onclick = list;
+  app.querySelector('#go').onclick = () => {
+    let r;
+    try { r = importRecipes(txt.value); } catch { return alert('El texto no es una exportación válida de Recetaurio.'); }
+    alert(`Importadas: ${r.added}. Omitidas: ${r.skipped}.`);
+    list();
   };
 }
