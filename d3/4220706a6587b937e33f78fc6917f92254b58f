@@ -1,0 +1,21 @@
+package-lock.json
+  s_db63c0ad28462c::t_32524c7f64be8c 14
+package.json
+  s_db63c0ad28462c::t_6ced5a290e5e88 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d34220706a6587b937e33f78fc6917f92254b58f",
+  "prompts": {},
+  "sessions": {
+    "s_db63c0ad28462c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b8d4f44f-473b-4131-bba3-7afbe29bea9d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Ulises Acosta <ulises.xsoft@gmail.com>"
+    }
+  }
+}
