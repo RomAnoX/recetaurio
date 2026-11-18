@@ -3,6 +3,17 @@ apply plugin: 'com.android.application'
 android {
     namespace = "com.recetaurio.app"
     compileSdk = rootProject.ext.compileSdkVersion
+    // Fixed key for the debug APK so a new build installs over the old one (keeps the app's data).
+    // Not a secret: it only signs sideloaded debug builds.
+    signingConfigs {
+        debug {
+            storeFile file('recetaurio-debug.p12')
+            storePassword 'recetaurio'
+            keyAlias 'recetaurio'
+            keyPassword 'recetaurio'
+            storeType 'pkcs12'
+        }
+    }
     defaultConfig {
         applicationId "com.recetaurio.app"
         minSdkVersion rootProject.ext.minSdkVersion
